@@ -10,9 +10,8 @@ EmployeeName varchar(100),
 DepartmentID int,
 foreign key(DepartmentID) references Departments(DepartmentID) on delete cascade
 );
-
 insert into Departments values 
-(200, "Testing");
+(300, "Deploying");
 
 insert into Employees values 
 (1,"Elena",100),
@@ -21,28 +20,32 @@ insert into Employees values
 
 delete from Departments where DepartmentID=200;
 
-create table dep (empid int primary key, depid int);
-insert into dep values(1,1000),(2,2000);
-select * from dep;
 
-create table AuditLogs ( 
-AuditID int, EmployeeID int, 
-OldDepartmentID int, NewDepartmentID int,
-ChangeDate timestamp);
+show create table Employees;
+alter table Employees drop foreign key Employees_ibfk_1;
+alter table Employees add constraint fk_emp_dep 
+foreign key(DepartmentID) references Departments(DepartmentID) on delete cascade on update cascade;
+
+create table AuditLog ( 
+	AuditID int auto_increment primary key,
+    EmployeeID int,
+    OldDepartmentID int,
+    NewDepartmentID int,
+    ChangeDate timestamp
+);
 
 Delimiter $$
-create trigger auditing_dep_changes 
-after update on dep
+create trigger auditlog_employee_changes
+after update on Employees
 for each row
 BEGIN 
-insert into AuditLogs(AuditID, EmployeeID, OldDepartmentID, NewDepartmentID, ChangeDate)
- values (NULL,OLD.empid, OLD.depid, NEW.depid, NOW());
-END$$ 
+insert into AuditLog(EmployeeID, OldDepartmentID, NewDepartmentID, ChangeDate)
+ values (OLD.EmployeeID, OLD.DepartmentID, NEW.DepartmentID, NOW());
+END $$ 
 Delimiter ;
 
-SET SQL_SAFE_UPDATES = 0;
+select * from AuditLog;
 
-update dep set depid=10000 where depid=1000;
-select * from AuditLogs;
+update Employees set DepartmentID=300 where DepartmentID=100;
 
-update dep set depid=20000 where depid=2000;
+show triggers;
