@@ -13,6 +13,8 @@ insert into Employees values("Caroline","Forbes");
 select * from Employees;
 
 create index idx_first_last on Employees(FirstName,LastName);
+drop index idx_first_last on Employees;
+
 
 select * from Products;
 
