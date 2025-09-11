@@ -29,11 +29,14 @@ INSERT INTO Salaries (EmployeeID, DepartmentID, SalaryMonth, Salary) VALUES
 
 select * from Salaries;
 
-select s.*, 
-avg(Salary) over(
-partition by DepartmentID 
-rows between 2 preceding and current row) avg_moving_salary
-from Salaries s;
+select distinct SalaryMonth,avg(Salary) over(partition by DepartmentID,SalaryMonth order by SalaryMonth) as Monthly_avg,DepartmentID from Salaries;
+
+
+select monthlyavgtable.*,
+avg(Monthly_avg) over(
+partition by DepartmentID
+rows between 2 preceding and current row) MovingAverageSalary from 
+(select distinct SalaryMonth,avg(Salary) over(partition by DepartmentID,SalaryMonth order by SalaryMonth) as Monthly_avg,DepartmentID from Salaries) as monthlyavgtable;
 
 ALTER TABLE Salaries
 ADD HireDate DATE;
